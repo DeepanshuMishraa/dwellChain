@@ -7,69 +7,95 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model Event {
-  id                  String    @id @default(cuid())
-  name                String
-  slug                String    @unique
-  description         String
-  startDate           DateTime
-  entryDate           DateTime?
-  endDate             DateTime
-  state               String?
-  liveStatus          Boolean?
-  publicVisibility    Boolean?
-  endedStatus         Boolean?
-  coverPhoto          String
-  thumbnail           String
-  organizerId         String
-  createdAt           DateTime  @default(now())
-  updatedAt           DateTime  @updatedAt
-  numberOfTickets     Int
-  ticketPrice         Float
-  nftSymbol           String?
-  numberOfTicketsSold Int       @default(0)
-  venueName           String
-  venueAddress        String
-  zipCode             String
-  organizer           User      @relation(fields: [organizerId], references: [id])
-  tickets             Ticket[]
-  orders              Order[]
+model Hotel {
+  id          String    @id @default(cuid())
+  name        String
+  description String?
+  address     String
+  city        String
+  state       String?
+  country     String
+  zipCode     String?
+  rooms       Room[]
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
 
-  @@map("events")
+  @@map("hotels")
 }
 
-model Ticket {
-  id        String   @id @default(cuid())
-  tokenId   String   @unique
-  eventId   String
-  status    String
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  userId    String
-  event     Event    @relation(fields: [eventId], references: [id])
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  orderId   String   @unique
-  order     Order    @relation(fields: [orderId], references: [id])
-  maxUses   Int      @default(1)
-  uses      Int      @default(0)
+model Room {
+  id          String    @id @default(cuid())
+  hotelId     String
+  name        String
+  description String?
+  capacity    Int
+  price       Float
+  amenities   String[]
+  photos      String[]
+  bookings    Booking[]
+  hotel       Hotel     @relation(fields: [hotelId], references: [id])
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
 
-  @@map("tickets")
+  @@map("rooms")
+}
+
+model Booking {
+  id         String         @id @default(cuid())
+  userId     String
+  roomId     String
+  startDate  DateTime
+  endDate    DateTime
+  status     BookingStatus
+  totalPrice Float
+  user       User           @relation(fields: [userId], references: [id])
+  room       Room           @relation(fields: [roomId], references: [id])
+  payment    Payment[]
+  createdAt  DateTime       @default(now())
+  updatedAt  DateTime       @updatedAt
+
+  @@map("bookings")
+}
+
+model Payment {
+  id         String        @id @default(cuid())
+  bookingId  String
+  amount     Float
+  status     PaymentStatus
+  booking    Booking       @relation(fields: [bookingId], references: [id])
+  createdAt  DateTime      @default(now())
+  updatedAt  DateTime      @updatedAt
+
+  @@map("payments")
+}
+
+enum BookingStatus {
+  PENDING
+  CONFIRMED
+  CANCELLED
+  COMPLETED
+}
+
+enum PaymentStatus {
+  PENDING
+  COMPLETED
+  FAILED
 }
 
 model User {
-  id            String    @id @default(cuid())
+  id            String        @id @default(cuid())
   name          String?
   bio           String?
-  email         String    @unique
-  walletAddress String?   @unique
+  email         String        @unique
+  walletAddress String?       @unique
   publicEmail   Boolean?
   salt          String?
   password      String?
   emailVerified DateTime?
   image         String?
-  isOnboarded   Boolean   @default(false)
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
+  isOnboarded   Boolean       @default(false)
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
 
   streetAddress String?
   city          String?
@@ -77,13 +103,13 @@ model User {
   postalCode    String?
   country       String?
   currency      String?
-  events        Event[]
-  tickets       Ticket[]
-  orders        Order[]
+  bookings      Booking[]
   socialLink    SocialLink?
   accounts      Account[]
+
   @@map("users")
 }
+
 model Account {
   userId            String
   type              String
@@ -96,22 +122,23 @@ model Account {
   scope             String?
   id_token          String?
   session_state     String?
- 
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
- 
+
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
- 
+
   @@id([provider, providerAccountId])
   @@map("accounts")
 }
+
 model SocialLink {
   id           String   @id @default(cuid())
   instagramUrl String?
   twitterUrl   String?
   githubUrl    String?
   discordUrl   String?
-  userId       String   @unique // Ensuring one-to-one relationship
+  userId       String   @unique
   user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
@@ -119,46 +146,11 @@ model SocialLink {
   @@map("social_links")
 }
 
-model Order {
-  id String @id @default(cuid())
-
-  customer User        @relation(fields: [userId], references: [id])
-  event    Event       @relation(fields: [eventId], references: [id])
-  ticket   Ticket?
-  status   OrderStatus
-
-  eventId String
-  userId  String
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  @@map("orders")
-}
-model EntryCode{
-  id String @id @default(cuid())
-  code String @unique
-  walletAddress String
-  nftAddress String
-  eventId String
-  expiresAt DateTime
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  @@map("entry_codes")
-}
-enum OrderStatus {
-  PENDING
-  COMPLETED
-  CANCELLED
-}
-
 model NewsletterEmails {
-  id           Int      @id @default(autoincrement())
-  email        String   @unique
-  isNotified   Boolean  @default(false)
-  createdAt    DateTime @default(now())
+  id         Int      @id @default(autoincrement())
+  email      String   @unique
+  isNotified Boolean  @default(false)
+  createdAt  DateTime @default(now())
 
   @@map("newsletter_emails")
 }
-
