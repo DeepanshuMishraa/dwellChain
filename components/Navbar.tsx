@@ -12,7 +12,7 @@ import { LoggedInUserContext } from "@/contexts/LoggedInUserContext";
 import { Routes } from "@/routes";
 import { cn } from "@/lib/utils";
 import {Sparkles  } from 'lucide-react'
- 
+
 import { AnimatePresence, motion } from "framer-motion";
 import {
 	mobilenavbarVariant,
@@ -74,9 +74,9 @@ export function Navbar() {
 							<div className='md:flex gap-4 sm:gap-6 hidden ml-auto'>
 								<Link
 									className='flex items-center font-medium text-sm hover:text-purple-600 dark:hover:text-purple-400 transition-colors'
-									href='/events'
+									href='/rooms'
 								>
-									<span className='flex items-center'>Events</span>
+									<span className='flex items-center'>Find rooms</span>
 								</Link>
 
 								<Link
