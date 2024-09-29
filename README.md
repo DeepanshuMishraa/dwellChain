@@ -8,7 +8,11 @@ A platform for booking rooms using crypto
 
 Follow these steps to set up and run the project locally:
 
-1. Clone the Repository:
+1. Fork the repository
+
+a) Fork the repository to your GitHub by creating a new fork.
+
+b) Clone the Repository:
 
 ```bash
   git clone https://github.com/Tufailahmed-Bargir/dwellChain.git
