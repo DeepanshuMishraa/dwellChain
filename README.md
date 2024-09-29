@@ -1,8 +1,3 @@
-<<<<<<< HEAD
- 
-=======
-
->>>>>>> add-readme
 # DwellChain
 
 A platform for booking rooms using crypto
